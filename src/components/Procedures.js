@@ -16,6 +16,7 @@ import DeleteProcedureDialog from "./DeleteProcedureDialog";
 
 import { useState } from "react";
 import { useAppContext } from "../contexts/AppContext";
+import { v4 as uuidv4 } from 'uuid';
 
 
 const formatUSD = (value) => {
@@ -93,10 +94,23 @@ export default function Procedures() {
     };
     const handleSubmitDeleteDialog = (opId) => {
         handleCloseDeleteDialog()
+
         const curruntOp = curOp.filter((o) => {
             return o.id !== opId
         })
         localStorage.setItem('operations', JSON.stringify(curruntOp))
+
+        const op = [...curruntOp]
+        const cusList = []
+        op.forEach(o => {
+            cusList.push(...o.passengersNames)
+        })
+        const excistingNames = new Set(cusList)
+        const finalCusList = [...excistingNames].map((cus) => {
+            return {id: uuidv4(), name:cus}
+        })
+        localStorage.setItem('customers', JSON.stringify(finalCusList))
+
         setCurOp(curruntOp)
         AppContext.showHideSnack('تم الحذف بنجاح', 'error')
     }
