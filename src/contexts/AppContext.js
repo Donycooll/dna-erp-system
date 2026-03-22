@@ -34,7 +34,8 @@ export const AppProvider = ({children}) => {
             })
             const excistingNames = new Set(cusList)
             const finalCusList = [...excistingNames].map((cus) => {
-                return {id: uuidv4(), name:cus}
+                const opCount = op.filter(o => o.passengersNames.includes(cus))
+                return {id: uuidv4(), name:cus, operationCount: opCount.length}
             })
             localStorage.setItem('customers', JSON.stringify(finalCusList))
             setPrevCus(finalCusList)
@@ -92,6 +93,7 @@ export const AppProvider = ({children}) => {
         {id: '4', name:'جودي'},
         {id: '5', name:'تاركو البحرية'},
         {id: '6', name:'واسا'},
+        {id: '7', name:'عالمي'},
     ])
 
     const [operations, setOperations] = useState([
@@ -118,23 +120,32 @@ export const AppProvider = ({children}) => {
         const newOperation = {...operation, id: uuidv4(), creationDate: new Date()}
         setOperations([...operations, newOperation])
 
-        setPrevCus(JSON.parse(localStorage.getItem('customers')))
-        const newCusList = []
-        operation.passengersNames
-        .filter((name) => (
-            !prevCus.some(obj => obj.name === name)
-        ))
-        .forEach((c) => newCusList.push({id: uuidv4(), name:c}))
+        const previousCustomers = (JSON.parse(localStorage.getItem('customers'))) || []
 
+        operation.passengersNames.forEach(passName => {
+            const cusInd = previousCustomers.findIndex(c => c.name === passName)
+            if(cusInd !== -1) {
+                previousCustomers[cusInd] = {
+                    ...previousCustomers[cusInd],
+                    operationCount: previousCustomers[cusInd].operationCount + 1,
+                }
+            } else {
+                previousCustomers.push({
+                    id: uuidv4(),
+                    name: passName,
+                    operationCount: 1
+                })
+            }
+        })
 
 
         if(localStorage.getItem('operations')) {
             const storedOperations = JSON.parse(localStorage.getItem('operations'))
             localStorage.setItem('operations', JSON.stringify([newOperation, ...storedOperations]))
-            localStorage.setItem('customers', JSON.stringify([...newCusList, ...prevCus]))
+            localStorage.setItem('customers', JSON.stringify(previousCustomers))
         } else {
             localStorage.setItem('operations', JSON.stringify([newOperation]))
-            localStorage.setItem('customers', JSON.stringify(newCusList))
+            localStorage.setItem('customers', JSON.stringify(previousCustomers))
         }
     }
 

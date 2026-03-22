@@ -167,6 +167,7 @@ const EditProcedureDialog = ({opId, open, handleClose, handleSubmit}) => {
                     </Typography>
                     {[...Array(newProcedureValues.peopleCount)].map((_, index) => (
                         <TextField
+                          disabled
                           key={index}
                           id="passengersNames"
                           fullWidth
